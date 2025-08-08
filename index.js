@@ -1,23 +1,23 @@
 export default async function handler(req, res) {
-  const { body, method } = req;
+  // 🔐 Set CORS headers
+  res.setHeader("Access-Control-Allow-Origin", "https://revved.digital");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  if (method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+  // ⚠️ Handle preflight request
+  if (req.method === "OPTIONS") {
+    res.status(200).end();
+    return;
   }
 
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify(body),
-    });
+  // ✅ Your actual POST logic
+  if (req.method === "POST") {
+    const { prompt } = req.body;
 
-    const data = await response.json();
-    res.status(response.status).json(data);
-  } catch (error) {
-    res.status(500).json({ error: "Proxy error", details: error.message });
+    // Your OpenAI API call or whatever logic here
+    const result = { message: `You said: ${prompt}` };
+    res.status(200).json(result);
+  } else {
+    res.status(405).end(); // Method Not Allowed
   }
 }
