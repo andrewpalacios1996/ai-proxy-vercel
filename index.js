@@ -1,16 +1,20 @@
+export const config = {
+  api: {
+    bodyParser: true,
+  },
+};
+
 export default async function handler(req, res) {
-  // Set CORS headers to allow your frontend
-  res.setHeader("Access-Control-Allow-Origin", "https://revved.digital");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  // ✅ Allow CORS from any origin during testing — tighten later if needed
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // Handle CORS preflight
+  // ✅ Handle preflight requests
   if (req.method === "OPTIONS") {
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
 
-  // Handle POST requests
   if (req.method === "POST") {
     try {
       const { prompt } = req.body;
@@ -19,18 +23,14 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: "Missing prompt" });
       }
 
-      // Replace this with actual API logic (e.g. calling OpenAI)
-      const fakeResponse = {
-        response: `You said: ${prompt}`
-      };
-
-      return res.status(200).json(fakeResponse);
-    } catch (error) {
-      console.error("Error handling request:", error);
-      return res.status(500).json({ error: "Internal server error" });
+      // Fake AI response
+      const result = { response: `You said: ${prompt}` };
+      return res.status(200).json(result);
+    } catch (err) {
+      console.error("API error:", err);
+      return res.status(500).json({ error: "Server error" });
     }
   }
 
-  // All other methods not allowed
-  res.status(405).json({ error: "Method Not Allowed" });
+  return res.status(405).json({ error: "Method Not Allowed" });
 }
